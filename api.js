@@ -7,6 +7,10 @@ var bodyParser  = require( 'body-parser'  );
 
 
 
+//=============================================================================
+// App Config Setup
+//=============================================================================
+
 var app = express() ; 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -18,21 +22,7 @@ app.use( bodyParser.urlencoded( { extended: false } ) ) ;
 app.use( bodyParser.json()                            ) ;
 
 
-
-app.post( '/api/consume/webhook', webhookConsumptionCbk ) ;
-
-app.get( '/api/getAllTransactions', getAllTxCbk ) ;
-
-app.get( '/api/getAllProducts', getProductsCbk ) ; 
-
-app.get( '/api/getProductsForTx/:txid', getProductsForTx ) ;
-
-
-app.get( '/api/vpc', viewProductsCache ) ;
-
-
-
-
+// Config Setup for Websocket between phone and server
 http.listen(port, function(){
   console.log('listening on *:' + port);
 });
@@ -45,20 +35,41 @@ io.on('connection', function(socket){
 });
 
 
+
+//=============================================================================
+// Access Code Definitions
+//=============================================================================
+
+
 //Walter Bishop
-var accessToken       = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq';
-var txCacheFilename   = './json/txCache.json'                                             ;
-var prodCacheFilename = './json/prodCache.json'                                           ;
-var productsFilename  = './json/products.json'                                            ;
+var wb                = 'e930gP64ViFiWwDxfvP5DsAjXVkfkXgBJ9aB67ynqtFe37AgJlJgzLBKalgVl35r' ;
+//Arjun Muhunthan
+var am                = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq' ;
+// Nyota Uhura
+var nu                = 'kwkZquzjcx6jfZEMqK6WBkw0o2RF8Ps2To7S9zZ6VBlbu4VDrgkyvYyScco3eaen' ;
+var accessToken       = nu                                                                 ;
+var txCacheFilename   = './json/txCache.json'                                              ;
+var prodCacheFilename = './json/prodCache.json'                                            ;
+var productsFilename  = './json/products.json'                                             ;
 
 
-function viewProductsCache( req, res )
-{
-	var prodCache = jsonfile.readFileSync( prodCacheFilename ) ;
+//=============================================================================
+// API Declaration
+//=============================================================================
 
-	res.json( prodCache ) ;
-}
+app.post( '/api/consume/webhook', webhookConsumptionCbk ) ;
 
+app.get( '/api/getAllTransactions', getAllTxCbk ) ;
+
+app.get( '/api/getAllProducts', getProductsCbk ) ; 
+
+app.get( '/api/getProductsForTx/:txId', getProductsForTxCbk ) ;
+
+
+
+//=============================================================================
+// API Definitions
+//=============================================================================
 
 function webhookConsumptionCbk( req, res )
 {
@@ -84,53 +95,30 @@ function webhookConsumptionCbk( req, res )
 
 }
 
-function getProductsForTx( req, res)
+function getProductsForTxCbk( req, res)
 {
 
-	var txIdStr = req.params.txId ;
+	var txId = req.params.txId ;
 
-	var txId = Number( txIdStr ) ;
+	var prodCache = jsonfile.readFileSync( prodCacheFilename ) ;
 
-	if ( txId == NaN )
-	{
-		var errorStr = 'api/getTopProducts/ called with NaN (' 
-		             + txIdStr 
-		             + ') ' ; 
+	var result = _.filter( prodCache, { 'id': txId } ) ;
 
-		console.error( errorStr ) ;
-
-		res.status(400).send(errorStr) ;
-
-		return ;
-	}
-
-	var result = [ 
-					{ 'id'      : 1,
-					  'price'   : 0.52,
-					  'product' : 'Banana' 
-					    },
-					{ 'id'      : 1,
-					  'price'   : 1.50,
-					  'product' : 'Apple' 
-					    },
-					{ 'id'      : 1,
-					  'price'   : 2.50,
-					  'product' : 'Carrp' 
-					    }
-				] ;
-
-	res.json(result);
+	res.json( result ) ;
 
 }
 
 function getAllTxCbk( req, res )
 {
 
-	var startlingTx = getTxFromStarlingAPI( accessToken ) ;
+	//TODO CHECK THIS LOGIC, IF TX DOESNT EXIST IN CACHCE, THEN PASS
+	// IT THROUGHT THE WEBHOOK
 
-	updateTxCache( startlingTx ) ;
+	// var startlingTx = getTxFromStarlingAPI( accessToken ) ;
 
-	var allTxs = getTxFromCache() ;
+	// updateTxCache( startlingTx ) ;
+
+	var allTxs = jsonfile.readFileSync( txCacheFilename ) ;
 
 	res.status( 200 ).json ( allTxs ) ;
 }
@@ -139,6 +127,9 @@ function getAllTxCbk( req, res )
 
 function getProductsCbk( req, res ) 
 {
+	var prodCache = jsonfile.readFileSync( prodCacheFilename ) ;
+
+	res.json( prodCache ) ;
 }
 
 
@@ -255,7 +246,6 @@ function getTxFromStarlingAPI( actk )
 		 		  } 
 		}
 	);
-
 
 	return filteredSTxData;
 
