@@ -6,7 +6,7 @@ var cors = require( 'cors' ) ;
 var app = express() ; 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var port = process.env.PORT || 80;
+var port = process.env.PORT || 8080;
 
 
 

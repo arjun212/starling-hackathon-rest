@@ -18,7 +18,7 @@
   },
   "scripts": {
     "local": "node api.js",
-    "start": "node js",
+    "start": "node api.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Arjun Muhunthan",
