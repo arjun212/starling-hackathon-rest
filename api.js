@@ -6,8 +6,7 @@ var _           = require( 'lodash'       ) ;
 var bodyParser  = require( 'body-parser'  ) ;
 
 
-var http        = require( 'http'         ).Server( app ) ;
-var io          = require( 'socket.io'    )( http ) ;
+
 
 
 
@@ -18,13 +17,16 @@ var io          = require( 'socket.io'    )( http ) ;
 var app = express() ; 
 var port = process.env.PORT || 8080;
 
+var http        = require( 'http'         ).Server( app ) ;
+var io          = require( 'socket.io'    )( http ) ;
+
+io.set('origins', '*:*');
 
 
 app.use( cors(  )                                     ) ;
 app.use( bodyParser.urlencoded( { extended: false } ) ) ; 
 app.use( bodyParser.json()                            ) ;
 
-io.set('origins', '*:*');
 
 // Config Setup for Websocket between phone and server
 http.listen(port, function(){
