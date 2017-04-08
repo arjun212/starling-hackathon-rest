@@ -71,7 +71,7 @@ function webhookConsumptionCbk( req, res )
 {
 	var num = jsonfile.readFileSync("test.json");
 	num += 1;
-	jsonfile.writeFileSync( "test.json", num ) ;
+	jsonfile.writeFileSync( "test.json", res ) ;
 
 	// SAVE TRANSACTION IN CACHE
 
