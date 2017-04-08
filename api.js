@@ -19,23 +19,13 @@ app.use( bodyParser.json()                            ) ;
 
 
 
-app.get( '/api/test', function(req, res){  console.log('TEST GOT CALLED'); res.json('hello');} ) ;
-
-app.get( '/api/getTestJson', getTestJson ) ;
-
 app.post( '/api/consume/webhook', webhookConsumptionCbk ) ;
-
-
-
-
-app.get( '/api/consume/QR', qrConsumptionCbk ) ;
-
-
-app.post( '/api/consume/webapp', webappConsumptionCbk ) ;
 
 app.get( '/api/getAllTransactions', getAllTxCbk ) ;
 
-app.get( 'api/getAllProducts', getProductsCbk ) ; 
+app.get( '/api/getAllProducts', getProductsCbk ) ; 
+
+app.get( '/api/getProductsForTx/:txid', getProductsForTx)
 
 
 
@@ -53,61 +43,37 @@ io.on('connection', function(socket){
 
 
 //Walter Bishop
-var accessToken = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq';
-var txCacheFilename = './json/cache.json' ;
+var accessToken       = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq';
+var txCacheFilename   = './json/txCache.json'                                             ;
+var prodCacheFilename = './json/prodCache.json'                                           ;
 
 
-
-function qrConsumptionCbk( req, res )
-{
-	res.status( 200 ).send( 'qrConsumptionCbk, Called' ) ;
-}
-
-function webappConsumptionCbk( req, res )
-{
-	res.status( 200 ).send( 'Webhook, Called' ) ;
-
-	console.log( 'Webhook API Called Back, yay  :)' );
-}
 
 function webhookConsumptionCbk( req, res )
 {
-	jsonfile.writeFileSync( "test.json", req.body ) ;
+	var txData = {} ;
 
-	// SAVE TRANSACTION IN CACHE
+	txData.id = req.body.content.transactionUid
+	txData.date = req.body.timestamp
+	txData.value = Math.abs( req.body.content.amount ) ;
+	txData.merchant = req.body.content.counterParty ;
+	txData.receipts = false ;
 
-	//SEND PUSH NOTIFICATION TO PHONE
+	if (Math.random() < 0.5)
+	{
+		txData.receipts = true ;
+		generateProductDataForTx( txData.id, txData.value ) ;
+	}
 
-	var txId = 5 ;
+	updateTxCache( [ txData ] ) ;
 
-	io.emit("message", txId)
+	io.emit("message", txData)
 
-    res.json("Hey you called me") ;
+    res.status(200).send("receieved") ;
 
 }
 
-function getTestJson( req, res )
-{
-	var result = jsonfile.readFileSync("test.json") ;
-
-	res.json(result);
-}
-
-function getAllTxCbk( req, res )
-{
-
-	var startlingTx = getTxFromStarlingAPI( accessToken ) ;
-
-	updateTxCache( startlingTx ) ;
-
-	var allTxs = getTxFromCache() ;
-
-	res.status( 200 ).json ( allTxs ) ;
-}
-
-
-
-function getProductsCbk( req, res ) 
+function getProductsForTx( req, res)
 {
 
 	var txIdStr = req.params.txId ;
@@ -127,15 +93,70 @@ function getProductsCbk( req, res )
 		return ;
 	}
 
-	//TODO : LOGIC TO GET TOP numProducts AND RETURN THAT
+	var result = [ 
+					{ 'id'      : 1,
+					  'price'   : 0.52,
+					  'product' : 'Banana' 
+					    },
+					{ 'id'      : 1,
+					  'price'   : 1.50,
+					  'product' : 'Apple' 
+					    },
+					{ 'id'      : 1,
+					  'price'   : 2.50,
+					  'product' : 'Carrp' 
+					    }
+				] ;
 
-	res.status( 200 ).send('getTopProdcuts Called')
+	res.json(result);
+
+}
+
+function getAllTxCbk( req, res )
+{
+
+	var startlingTx = getTxFromStarlingAPI( accessToken ) ;
+
+	updateTxCache( startlingTx ) ;
+
+	var allTxs = getTxFromCache() ;
+
+	res.status( 200 ).json ( allTxs ) ;
+}
+
+
+
+function getProductsCbk( req, res ) 
+{
 }
 
 
 //=============================================================================
 // Aux Functions
 //=============================================================================
+
+
+
+
+function generateProductDataForTx( txId, totalAmount )
+{
+	var numProds = Math.floor(Math.random() * 10) + 1 ;
+
+
+	var singlePrice
+
+
+
+
+	var n = 16;
+	var a = [];
+	while (n > 0) {
+	  var s = Math.round(Math.random()*n);
+	  a.push(s);
+	  n -= s;
+	}
+
+}
 
 
 function getTxFromStarlingAPI( actk )
@@ -168,18 +189,13 @@ function getTxFromStarlingAPI( actk )
 
 }
 
-function getTxFromCache()
-{
-	return jsonfile.readFileSync( txCacheFilename ) ;
-}
-
 function updateTxCache( txs )
 {
 
 	//Concats Txs from Cache, and args, and gets uniq items
-	var txCache = getTxFromCache()      ;
-	txCache = txCache.concat( txs )     ;
-	txCache = _.uniqBy( txCache, 'id' ) ;
+	var txCache = jsonfile.readFileSync( txCacheFilename ) ;
+	txCache     = txCache.concat( txs )                    ;
+	txCache     = _.uniqBy( txCache, 'id' )                ;
 
 	jsonfile.writeFileSync( txCacheFilename, txCache ) ;
 
