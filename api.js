@@ -20,7 +20,7 @@ app.get( '/api/test', function(req, res){  console.log('TEST GOT CALLED'); res.j
 
 app.get( '/api/getTestJson', getTestJson ) ;
 
-app.get( '/api/consume/webhook', webhookConsumptionCbk ) ;
+app.post( '/api/consume/webhook', webhookConsumptionCbk ) ;
 
 
 
