@@ -1,8 +1,9 @@
-var express  = require( 'express'      ) ;
-var request  = require( 'sync-request' ) ;
-var cors     = require( 'cors'         ) ;
-var jsonfile = require( 'jsonfile'     ) ;
-var _        = require( 'lodash'       ) ;
+var express     = require( 'express'      ) ;
+var request     = require( 'sync-request' ) ;
+var cors        = require( 'cors'         ) ;
+var jsonfile    = require( 'jsonfile'     ) ;
+var _           = require( 'lodash'       ) ;
+var bodyParser  = require( 'body-parser'  );
 
 
 
@@ -12,9 +13,11 @@ var io = require('socket.io')(http);
 var port = process.env.PORT || 8080;
 
 
+app.use( cors(  )                                     ) ;
+app.use( bodyParser.urlencoded( { extended: false } ) ) ; 
+app.use( bodyParser.json()                            ) ;
 
 
-app.use( cors(  ) ) ;
 
 app.get( '/api/test', function(req, res){  console.log('TEST GOT CALLED'); res.json('hello');} ) ;
 
@@ -69,7 +72,7 @@ function webappConsumptionCbk( req, res )
 
 function webhookConsumptionCbk( req, res )
 {
-	jsonfile.writeFileSync( "test.json", req ) ;
+	jsonfile.writeFileSync( "test.json", req.body ) ;
 
 	// SAVE TRANSACTION IN CACHE
 
