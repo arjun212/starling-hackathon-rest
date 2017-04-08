@@ -16,19 +16,19 @@ var port = process.env.PORT || 8080;
 
 app.use( cors(  ) ) ;
 
-app.get( '/api/test', function(req, res){  console.log('TEST GOT CALLED'); res.send('hello');} ) ;
+app.get( '/api/test', function(req, res){  console.log('TEST GOT CALLED'); res.json('hello');} ) ;
 
-app.get( 'api/getTestJson', getTestJson ) ;
+app.get( '/api/getTestJson', getTestJson ) ;
 
-app.get( 'api/consume/webhook', webhookConsumptionCbk ) ;
-
-
+app.get( '/api/consume/webhook', webhookConsumptionCbk ) ;
 
 
-app.get( 'api/consume/QR', qrConsumptionCbk ) ;
 
 
-app.post( 'api/consume/webapp', webappConsumptionCbk ) ;
+app.get( '/api/consume/QR', qrConsumptionCbk ) ;
+
+
+app.post( '/api/consume/webapp', webappConsumptionCbk ) ;
 
 app.get( '/api/getAllTransactions', getAllTxCbk ) ;
 
@@ -69,7 +69,7 @@ function webappConsumptionCbk( req, res )
 
 function webhookConsumptionCbk( req, res )
 {
-	var num = jsonFile.readFileSync("test.json");
+	var num = jsonfile.readFileSync("test.json");
 	num += 1;
 	jsonfile.writeFileSync( "test.json", num ) ;
 
@@ -77,16 +77,19 @@ function webhookConsumptionCbk( req, res )
 
 	//SEND PUSH NOTIFICATION TO PHONE
 
-    io.emit('message', num);
+	var txId = 5 ;
 
+	io.emit("message", txId)
+
+    res.json("Hey you called me") ;
 
 }
 
 function getTestJson( req, res )
 {
-	var result = jsonFile.readFileSync("test.json") ;
+	var result = jsonfile.readFileSync("test.json") ;
 
-	res.send(result);
+	res.json(result);
 }
 
 function getAllTxCbk( req, res )
