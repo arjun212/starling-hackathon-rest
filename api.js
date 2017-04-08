@@ -49,6 +49,7 @@ io.on('connection', function(socket){
 var accessToken       = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq';
 var txCacheFilename   = './json/txCache.json'                                             ;
 var prodCacheFilename = './json/prodCache.json'                                           ;
+var productsFilename  = './json/products.json'                                            ;
 
 
 function viewProductsCache( req, res )
@@ -167,10 +168,10 @@ function addNewPrice( arrOfPrices )
 
 function getListOfProducts( numProds )
 {
-	var allProducts = jsonfile.readFileSync( txCacheFilename ) ;
+	var allProducts = jsonfile.readFileSync( productsFilename ) ;
 	var results = [] ;
 
-	for ( var i in range( numProds ) )
+	for ( i = 0; i < numProds; ++i )
 	{
 		var index = Math.floor(Math.random() * allProducts.length) + 1
 
@@ -191,7 +192,7 @@ function writeToTxProdsCache( arrOfTxProds )
 
 	txProds     = txProds.concat( arrOfTxProds ) ;
 
-	txProds     = _.uniqBy( txCache, ( elem ) => { return elem['id'] + ' ' + elem['product'] } ) ;
+	txProds     = _.uniqBy( txProds, ( elem ) => { return elem['id'] + ' ' + elem['product'] } ) ;
 
 	jsonfile.writeFileSync( prodCacheFilename, txProds ) ;
 
@@ -206,20 +207,20 @@ function generateProductDataForTx( txId, totalAmount )
 
 	var resultPrices = [totalAmount];
 
-	if ( numProds < resultPrices.length )
+	while ( resultPrices.length < numProds )
 	{
 		resultPrices = addNewPrice( resultPrices ) ;
 	}
 
-	var resultProducts = getListOfProducts( numProds ) ;
+	var resultProducts = getListOfProducts( resultPrices.length ) ;
 
 	var results = [] ;
 
-	for (var i in range( numProds ))
+	for ( i = 0; i < resultPrices.length; ++i )
 	{
 		results.push( { 
 			'id'      : txId,
-			'price'   : resultPrices[ i ].toFixed( 2 ),
+			'price'   : Number( resultPrices[ i ].toFixed( 2 ) ),
 			'product' : resultProducts[ i ] 
 		} ) ;
 	}
