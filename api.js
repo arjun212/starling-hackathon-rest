@@ -55,7 +55,7 @@ function viewProductsCache( req, res )
 {
 	var prodCache = jsonfile.readFileSync( prodCacheFilename ) ;
 
-	res.json( res ) ;
+	res.json( prodCache ) ;
 }
 
 
