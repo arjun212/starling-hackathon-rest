@@ -1,6 +1,9 @@
-var express = require( 'express' ) ;
-var request = require('sync-request');
-var cors = require( 'cors' ) ;
+var express  = require( 'express'      ) ;
+var request  = require( 'sync-request' ) ;
+var cors     = require( 'cors'         ) ;
+var jsonfile = require( 'jsonfile'     ) ;
+var _        = require( 'lodash'       ) ;
+
 
 
 var app = express() ; 
@@ -11,26 +14,25 @@ var port = process.env.PORT || 8080;
 
 
 
-// var corsOptions = {
-//   origin: 'mas-starling-hackathon.herokuapp.com',
-//   optionsSuccessStatus: 200
-// }
-
 app.use( cors(  ) ) ;
-
-// app.use( express.logger() );
 
 app.get( '/api/test', function(req, res){  console.log('TEST GOT CALLED'); res.send('hello');} ) ;
 
-app.get( 'api/webhook', webhookCbk ) ;
+app.get( 'api/getTestJson', getTestJson ) ;
+
+app.get( 'api/consume/webhook', webhookConsumptionCbk ) ;
+
+
+
 
 app.get( 'api/consume/QR', qrConsumptionCbk ) ;
+
 
 app.post( 'api/consume/webapp', webappConsumptionCbk ) ;
 
 app.get( '/api/getAllTransactions', getAllTxCbk ) ;
 
-app.get( 'api/getProducts/:txId', getProductsForTxCbk ) ; 
+app.get( 'api/getAllProducts', getProductsCbk ) ; 
 
 
 
@@ -46,17 +48,11 @@ io.on('connection', function(socket){
   });
 });
 
+
 //Walter Bishop
 var accessToken = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq';
+var txCacheFilename = './json/cache.json' ;
 
-
-
-function webhookCbk( req, res ) 
-{
-	res.status( 200 ).send( 'Webhook, Called' ) ;
-
-	console.log( 'Webhook API Called Back, yay  :)' );
-}
 
 
 function qrConsumptionCbk( req, res )
@@ -66,14 +62,35 @@ function qrConsumptionCbk( req, res )
 
 function webappConsumptionCbk( req, res )
 {
-	res.status( 200 ).send( 'WebConsumptionCbk, Called' ) ;
+	res.status( 200 ).send( 'Webhook, Called' ) ;
 
+	console.log( 'Webhook API Called Back, yay  :)' );
+}
+
+function webhookConsumptionCbk( req, res )
+{
+	var num = jsonFile.readFileSync("test.json");
+	num += 1;
+	jsonfile.writeFileSync( "test.json", num ) ;
+
+	// SAVE TRANSACTION IN CACHE
+
+	//SEND PUSH NOTIFICATION TO PHONE
+
+    io.emit('message', num);
+
+
+}
+
+function getTestJson( req, res )
+{
+	var result = jsonFile.readFileSync("test.json") ;
+
+	res.send(result);
 }
 
 function getAllTxCbk( req, res )
 {
-
-	console.log('TXCBK ggot called') ;
 
 	var startlingTx = getTxFromStarlingAPI( accessToken ) ;
 
@@ -81,16 +98,12 @@ function getAllTxCbk( req, res )
 
 	var allTxs = getTxFromCache() ;
 
-	var allTxsInCorrectFormat = getTxIntoPOSTFormat( allTxs ) ;
-
-	//TODO : LOGIC HERE
-	res.status( 200 ).json ( startlingTx ) ;
-	// res.status( 200 ).json( allTxsInCorrectFormat ) ;
+	res.status( 200 ).json ( allTxs ) ;
 }
 
 
 
-function getProductsForTxCbk( req, res ) 
+function getProductsCbk( req, res ) 
 {
 
 	var txIdStr = req.params.txId ;
@@ -153,28 +166,20 @@ function getTxFromStarlingAPI( actk )
 
 function getTxFromCache()
 {
-	return require('./json/cache')
+	return jsonfile.readFileSync( txCacheFilename ) ;
 }
 
 function updateTxCache( txs )
 {
 
-	var txCache = getTxFromCache() ;
+	//Concats Txs from Cache, and args, and gets uniq items
+	var txCache = getTxFromCache()      ;
+	txCache = txCache.concat( txs )     ;
+	txCache = _.uniqBy( txCache, 'id' ) ;
 
-	for (tx in txs)
-	{
-
-	}
-
-
+	jsonfile.writeFileSync( txCacheFilename, txCache ) ;
 
 }
-
-function getTxIntoPOSTFormat( Txs )
-{
-
-}
-
 
 
 //=============================================================================
