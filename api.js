@@ -25,7 +25,10 @@ app.get( '/api/getAllTransactions', getAllTxCbk ) ;
 
 app.get( '/api/getAllProducts', getProductsCbk ) ; 
 
-app.get( '/api/getProductsForTx/:txid', getProductsForTx)
+app.get( '/api/getProductsForTx/:txid', getProductsForTx ) ;
+
+
+app.get( '/api/vpc', viewProductsCache ) ;
 
 
 
@@ -47,6 +50,13 @@ var accessToken       = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK1
 var txCacheFilename   = './json/txCache.json'                                             ;
 var prodCacheFilename = './json/prodCache.json'                                           ;
 
+
+function viewProductsCache( req, res )
+{
+	var prodCache = jsonfile.readFileSync( prodCacheFilename ) ;
+
+	res.json( res ) ;
+}
 
 
 function webhookConsumptionCbk( req, res )
@@ -136,25 +146,86 @@ function getProductsCbk( req, res )
 //=============================================================================
 
 
+function addNewPrice( arrOfPrices )
+{
+	var max   = _.max( arrOfPrices )       ;
+	var index = arrOfPrices.indexOf( max ) ;
+	
+	arrOfPrices.splice( index, 1 ) ;
 
+
+	// Just in case Math.Random comes back with 0, then default to 0.25
+	var newPriceRatio1 = Math.random() || 0.25 ;
+	var newPriceRatio2 = 1 - newPriceRatio1 ;
+
+	arrOfPrices.push(newPriceRatio1 * max) ;
+	arrOfPrices.push(newPriceRatio2 * max) ;
+
+	return arrOfPrices ;
+
+}
+
+function getListOfProducts( numProds )
+{
+	var allProducts = jsonfile.readFileSync( txCacheFilename ) ;
+	var results = [] ;
+
+	for ( var i in range( numProds ) )
+	{
+		var index = Math.floor(Math.random() * allProducts.length) + 1
+
+		results.push( allProducts[ index ] ) ;
+
+		allProducts.splice( index, 1 ) ;
+
+	}
+
+	return results;
+
+}
+
+
+function writeToTxProdsCache( arrOfTxProds )
+{
+	var txProds = jsonfile.readFileSync( prodCacheFilename ) ;
+
+	txProds     = txProds.concat( arrOfTxProds ) ;
+
+	txProds     = _.uniqBy( txCache, ( elem ) => { return elem['id'] + ' ' + elem['product'] } ) ;
+
+	jsonfile.writeFileSync( prodCacheFilename, txProds ) ;
+
+}
 
 function generateProductDataForTx( txId, totalAmount )
 {
 	var numProds = Math.floor(Math.random() * 10) + 1 ;
 
 
-	var singlePrice
+	var max = totalAmount;
 
+	var resultPrices = [totalAmount];
 
-
-
-	var n = 16;
-	var a = [];
-	while (n > 0) {
-	  var s = Math.round(Math.random()*n);
-	  a.push(s);
-	  n -= s;
+	if ( numProds < resultPrices.length )
+	{
+		resultPrices = addNewPrice( resultPrices ) ;
 	}
+
+	var resultProducts = getListOfProducts( numProds ) ;
+
+	var results = [] ;
+
+	for (var i in range( numProds ))
+	{
+		results.push( { 
+			'id'      : txId,
+			'price'   : resultPrices[ i ].toFixed( 2 ),
+			'product' : resultProducts[ i ] 
+		} ) ;
+	}
+
+
+	writeToTxProdsCache( results ) ;
 
 }
 
@@ -176,7 +247,7 @@ function getTxFromStarlingAPI( actk )
 	var filteredSTxData = sTxData.map(
 		(elem) => { return { 
 					'date'     : elem.created          ,
-					'value'    : Math.abs(elem.amount).toFixed(2) ,
+					'value'    : Math.abs(elem.amount).toFixed( 2 ) ,
 					'merchant' : elem.narrative        ,
 					'id'       : elem.id    		   ,
 					'receipts' : false
