@@ -3,7 +3,11 @@ var request     = require( 'sync-request' ) ;
 var cors        = require( 'cors'         ) ;
 var jsonfile    = require( 'jsonfile'     ) ;
 var _           = require( 'lodash'       ) ;
-var bodyParser  = require( 'body-parser'  );
+var bodyParser  = require( 'body-parser'  ) ;
+
+
+var http        = require( 'http'         ).Server( app ) ;
+var io          = require( 'socket.io'    )( http ) ;
 
 
 
@@ -12,15 +16,15 @@ var bodyParser  = require( 'body-parser'  );
 //=============================================================================
 
 var app = express() ; 
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 var port = process.env.PORT || 8080;
+
 
 
 app.use( cors(  )                                     ) ;
 app.use( bodyParser.urlencoded( { extended: false } ) ) ; 
 app.use( bodyParser.json()                            ) ;
 
+io.set('origins', '*:*');
 
 // Config Setup for Websocket between phone and server
 http.listen(port, function(){
@@ -33,6 +37,7 @@ io.on('connection', function(socket){
     io.emit('message', msg);
   });
 });
+
 
 
 
