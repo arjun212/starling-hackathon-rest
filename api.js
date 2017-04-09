@@ -189,7 +189,7 @@ function qrConsumptionCbk( req, res)
 
 
 
-	txs = _.remove(txs, { 'id' : 1 } ) ;
+	txs = [] ;
 
 	txs.concat([{
         "id": "1",
