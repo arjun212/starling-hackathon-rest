@@ -107,10 +107,10 @@ function qrConsumptionCbk( req, res)
 	var products = jsonfile.readFileSync( prodCacheFilename ) ;
 
 	products = _.remove( products, { 'id' : body[0].id } ) ;
-	
+
 	products = products.concat( body ) ;
 
-	jsonfile.writeFileSync( productsFilename, products ) ;
+	jsonfile.writeFileSync( prodCacheFilename, products ) ;
 
 	res.send( "receieved QR code" ) ;
 }
