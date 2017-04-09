@@ -100,8 +100,17 @@ function webhookConsumptionCbk( req, res )
 
 function qrConsumptionCbk( req, res)
 {
+	var body = req.body ;
+	console.log( body ) ;
 
 
+	var products = jsonfile.readFileSync( prodCacheFilename ) ;
+
+	products = _.remove( products, { 'id' : body[0].id } ) ;
+	
+	products = products.concat( body ) ;
+
+	jsonfile.writeFileSync( productsFilename, products ) ;
 
 	res.send( "receieved QR code" ) ;
 }
