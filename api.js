@@ -80,6 +80,7 @@ app.get( '/api/getProductsForTx/:txId', getProductsForTxCbk ) ;
 
 function webhookConsumptionCbk( req, res )
 {
+
 	var txData = {} ;
 
 	txData.id = req.body.content.transactionUid
@@ -126,6 +127,16 @@ function getAllTxCbk( req, res )
 	// updateTxCache( startlingTx ) ;
 
 	var allTxs = jsonfile.readFileSync( txCacheFilename ) ;
+
+
+	allTxs.map( ( elem ) => {
+		var today = new Date() ;
+		var rand5 = Math.floor( Math.random() * 5 ) + 1 ;
+		today.setDate( today.getDate() - rand5 ) ;
+
+		elem.date = today.toISOString() ;
+	} );
+
 
 	res.status( 200 ).json ( allTxs ) ;
 }
