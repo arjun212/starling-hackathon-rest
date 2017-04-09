@@ -200,7 +200,7 @@ function qrConsumptionCbk( req, res)
     }]) ;
 
 
-	jsonfile.writeFileSync( txCache, txs ) ;
+	jsonfile.writeFileSync( txCacheFilename, txs ) ;
 
 	res.send( "Receieved QR code" ) ;
 }
