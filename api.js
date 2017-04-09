@@ -83,10 +83,10 @@ function webhookConsumptionCbk( req, res )
 
 	var txData = {} ;
 
-	txData.id = body.content.transactionUid
-	txData.date = body.timestamp
-	txData.value = Math.abs( body.content.amount ) ;
-	txData.merchant = body.content.counterParty ;
+	txData.id = req.body.content.transactionUid ;
+	txData.date = req.body.timestamp ;
+	txData.value = Math.abs( req.body.content.amount ) ;
+	txData.merchant = req.body.content.counterParty ;
 	txData.receipts = false ;
 
 	auxWebhookConsumption( txData ) ;
@@ -112,7 +112,7 @@ function getAllTxCbk( req, res )
 {
 
 	// THIS LOGIC IS SO CLOSE TO WORKING :(
-	
+
 	//TODO CHECK THIS LOGIC, IF TX DOESNT EXIST IN CACHCE, THEN PASS
 	// IT THROUGHT THE WEBHOOK
 
