@@ -95,7 +95,7 @@ function getSumPriceOfProds( req, res)
 
 	var result =_.map( _.groupBy( justProds, 'product' ), (v, k) => ({ 
 		      product: k,
-	      	  price: _.sumBy( JSON.parse(v), 'price' )
+	      	  price: _.sumBy( v, 'price' )
 	 		 }) );
 
 	var total = 0 ; 
@@ -146,6 +146,11 @@ function qrConsumptionCbk( req, res)
 	products = _.remove( products, { 'id' : body[0].id } ) ;
 
 	products = products.concat( body ) ;
+
+	for (i = 0; i < products.length; ++i)
+	{
+		products.price = Number( products.price ) ;
+	}
 
 	jsonfile.writeFileSync( prodCacheFilename, products ) ;
 
@@ -309,6 +314,11 @@ function writeToTxProdsCache( arrOfTxProds )
 	txProds     = txProds.concat( arrOfTxProds ) ;
 
 	txProds     = _.uniqBy( txProds, ( elem ) => { return elem['id'] + ' ' + elem['product'] } ) ;
+
+	for (i = 0; i < txProds; ++i)
+	{
+		txProds[ i ].price = Number(txProds[ i ].price) ; 
+	}
 
 	jsonfile.writeFileSync( prodCacheFilename, txProds ) ;
 
