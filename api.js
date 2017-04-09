@@ -111,14 +111,16 @@ function getProductsForTxCbk( req, res)
 function getAllTxCbk( req, res )
 {
 
+	// THIS LOGIC IS SO CLOSE TO WORKING :(
+	
 	//TODO CHECK THIS LOGIC, IF TX DOESNT EXIST IN CACHCE, THEN PASS
 	// IT THROUGHT THE WEBHOOK
 
-	var startlingTx = getTxFromStarlingAPI( accessToken ) ;
+	// var startlingTx = getTxFromStarlingAPI( accessToken ) ;
 
-	var notInCacheTx = getTxNotInCache( startlingTx ) ;
+	// var notInCacheTx = getTxNotInCache( startlingTx ) ;
 
-	_.forEach( notInCache, auxWebhookConsumption ) ;
+	// _.forEach( notInCacheTx, auxWebhookConsumption ) ;
 
 	var allTxs = jsonfile.readFileSync( txCacheFilename ) ;
 
@@ -171,6 +173,8 @@ function auxWebhookConsumption( txData )
 		generateProductDataForTx( txData.id, txData.value ) ;
 	}
 
+	io.emit("message", txData)	
+
 	var today = new Date() ;
 	var rand5 = Math.floor( Math.random() * 5 ) + 1 ;
 	today.setDate( today.getDate() - rand5 ) ;
@@ -180,7 +184,6 @@ function auxWebhookConsumption( txData )
 
 	updateTxCache( [ txData ] ) ;
 
-	io.emit("message", txData)	
 }
 
 function addNewPrice( arrOfPrices )
