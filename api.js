@@ -49,28 +49,31 @@ io.on('connection', function(socket){
 
 
 //Walter Bishop
-var wb                = 'e930gP64ViFiWwDxfvP5DsAjXVkfkXgBJ9aB67ynqtFe37AgJlJgzLBKalgVl35r' ;
-//Arjun Muhunthan
-var am                = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq' ;
-// Nyota Uhura
-var nu                = 'kwkZquzjcx6jfZEMqK6WBkw0o2RF8Ps2To7S9zZ6VBlbu4VDrgkyvYyScco3eaen' ;
-var accessToken       = nu                                                                 ;
-var txCacheFilename   = './json/txCache.json'                                              ;
-var prodCacheFilename = './json/prodCache.json'                                            ;
-var productsFilename  = './json/products.json'                                             ;
+var wb                 = 'e930gP64ViFiWwDxfvP5DsAjXVkfkXgBJ9aB67ynqtFe37AgJlJgzLBKalgVl35r' ;
+//Arjun Muhunthan 
+var am                 = 'jPg45nv90P8v8o3EpXSMva03cklWnFVXaM0bXVzm25NxpXizcjdKNK10gKCevZoq' ;
+// Nyota Uhura 
+var nu                 = 'kwkZquzjcx6jfZEMqK6WBkw0o2RF8Ps2To7S9zZ6VBlbu4VDrgkyvYyScco3eaen' ;
+var accessToken        = nu                                                                 ;
+var txCacheFilename    = './json/txCache.json'                                              ;
+var prodCacheFilename  = './json/prodCache.json'                                            ;
+var productsFilename   = './json/products.json'                                             ;
+var merchantsFilename  = './json/merchants.json'                                            ;
 
 
 //=============================================================================
 // API Declaration
 //=============================================================================
 
-app.post( '/api/consume/webhook', webhookConsumptionCbk ) ;
+app.post( '/api/consume/webhook'        , webhookConsumptionCbk ) ;
 
-app.get( '/api/getAllTransactions', getAllTxCbk ) ;
+app.post( '/api/consume/qr'             , qrConsumptionCbk      ) ;
 
-app.get( '/api/getAllProducts', getProductsCbk ) ; 
+app.get ( '/api/getAllTransactions'     , getAllTxCbk           ) ;
 
-app.get( '/api/getProductsForTx/:txId', getProductsForTxCbk ) ;
+app.get ( '/api/getAllProducts'         , getProductsCbk        ) ; 
+
+app.get ( '/api/getProductsForTx/:txId' , getProductsForTxCbk   ) ;
 
 
 
@@ -86,12 +89,17 @@ function webhookConsumptionCbk( req, res )
 	txData.id = req.body.content.transactionUid ;
 	txData.date = req.body.timestamp ;
 	txData.value = Math.abs( req.body.content.amount ) ;
-	txData.merchant = req.body.content.counterParty ;
 	txData.receipts = false ;
+	txData.merchant = req.body.content.counterParty ;
 
 	auxWebhookConsumption( txData ) ;
 
     res.status(200).send("receieved") ;
+
+}
+
+function qrConsumptionCbk( req, res)
+{
 
 }
 
@@ -164,13 +172,29 @@ function getTxNotInCache( arrTx )
 
 }
 
+function getRandMerchant()
+{
+	var merchants = jsonfile.readFileSync( merchantsFilename ) ;
+
+	var index = Math.floor(Math.random() * merchants.length) + 1 ;
+
+	return merchants[index] ;
+}
+
 function auxWebhookConsumption( txData )
 {
 
 	if (Math.random() < 0.5)
 	{
 		txData.receipts = true ;
+		
+		txData.merchant = getRandMerchant() ;
+
 		generateProductDataForTx( txData.id, txData.value ) ;
+	} 
+	else
+	{
+		txData.merchant = "Amazon" ;
 	}
 
 	io.emit("message", txData)	
@@ -232,6 +256,11 @@ function writeToTxProdsCache( arrOfTxProds )
 	txProds     = txProds.concat( arrOfTxProds ) ;
 
 	txProds     = _.uniqBy( txProds, ( elem ) => { return elem['id'] + ' ' + elem['product'] } ) ;
+
+	txProds     = txProds.map(( elem ) => { 
+			elem.price = elem.price.toFixed( 2 );
+			return elem ;
+	} ) ;
 
 	jsonfile.writeFileSync( prodCacheFilename, txProds ) ;
 
