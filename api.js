@@ -83,21 +83,13 @@ function webhookConsumptionCbk( req, res )
 
 	var txData = {} ;
 
-	txData.id = req.body.content.transactionUid
-	txData.date = req.body.timestamp
-	txData.value = Math.abs( req.body.content.amount ) ;
-	txData.merchant = req.body.content.counterParty ;
+	txData.id = body.content.transactionUid
+	txData.date = body.timestamp
+	txData.value = Math.abs( body.content.amount ) ;
+	txData.merchant = body.content.counterParty ;
 	txData.receipts = false ;
 
-	if (Math.random() < 0.5)
-	{
-		txData.receipts = true ;
-		generateProductDataForTx( txData.id, txData.value ) ;
-	}
-
-	updateTxCache( [ txData ] ) ;
-
-	io.emit("message", txData)
+	auxWebhookConsumption( txData ) ;
 
     res.status(200).send("receieved") ;
 
@@ -122,21 +114,13 @@ function getAllTxCbk( req, res )
 	//TODO CHECK THIS LOGIC, IF TX DOESNT EXIST IN CACHCE, THEN PASS
 	// IT THROUGHT THE WEBHOOK
 
-	// var startlingTx = getTxFromStarlingAPI( accessToken ) ;
+	var startlingTx = getTxFromStarlingAPI( accessToken ) ;
 
-	// updateTxCache( startlingTx ) ;
+	var notInCacheTx = getTxNotInCache( startlingTx ) ;
+
+	_.forEach( notInCache, auxWebhookConsumption ) ;
 
 	var allTxs = jsonfile.readFileSync( txCacheFilename ) ;
-
-
-	allTxs.map( ( elem ) => {
-		var today = new Date() ;
-		var rand5 = Math.floor( Math.random() * 5 ) + 1 ;
-		today.setDate( today.getDate() - rand5 ) ;
-
-		elem.date = today.toISOString() ;
-	} );
-
 
 	res.status( 200 ).json ( allTxs ) ;
 }
@@ -155,6 +139,49 @@ function getProductsCbk( req, res )
 // Aux Functions
 //=============================================================================
 
+
+function getTxNotInCache( arrTx )
+{
+	var txCache = jsonfile.readFileSync( txCacheFilename ) ;
+
+	//those Tx not in the cache
+	var results = []
+
+	for ( i = 0; i < arrTx.length; ++i )
+	{
+		var index = _.findIndex( txCache, [ 'id', arrTx[ i ].id ] ) ;
+
+		if (index === -1)
+		{
+			results.push( arrTx[ i ] ) ;
+		}
+		
+	}
+
+	return results ;
+
+}
+
+function auxWebhookConsumption( txData )
+{
+
+	if (Math.random() < 0.5)
+	{
+		txData.receipts = true ;
+		generateProductDataForTx( txData.id, txData.value ) ;
+	}
+
+	var today = new Date() ;
+	var rand5 = Math.floor( Math.random() * 5 ) + 1 ;
+	today.setDate( today.getDate() - rand5 ) ;
+
+	txData.date = today.toISOString() ;
+
+
+	updateTxCache( [ txData ] ) ;
+
+	io.emit("message", txData)	
+}
 
 function addNewPrice( arrOfPrices )
 {
