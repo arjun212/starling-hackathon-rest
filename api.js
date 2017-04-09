@@ -179,7 +179,7 @@ function getRandMerchant()
 {
 	var merchants = jsonfile.readFileSync( merchantsFilename ) ;
 
-	var index = Math.floor(Math.random() * merchants.length) + 1 ;
+	var index = Math.floor(Math.random() * merchants.length) ;
 
 	return merchants[ index ] ;
 }
@@ -241,7 +241,7 @@ function getListOfProducts( numProds )
 
 	for ( i = 0; i < numProds; ++i )
 	{
-		var index = Math.floor(Math.random() * allProducts.length) + 1
+		var index = Math.floor(Math.random() * allProducts.length)
 
 		results.push( allProducts[ index ] ) ;
 
