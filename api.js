@@ -101,6 +101,9 @@ function webhookConsumptionCbk( req, res )
 function qrConsumptionCbk( req, res)
 {
 
+
+
+	res.send( "receieved QR code" ) ;
 }
 
 function getProductsForTxCbk( req, res)
@@ -178,7 +181,7 @@ function getRandMerchant()
 
 	var index = Math.floor(Math.random() * merchants.length) + 1 ;
 
-	return merchants[index] ;
+	return merchants[ index ] ;
 }
 
 function auxWebhookConsumption( txData )
@@ -196,6 +199,8 @@ function auxWebhookConsumption( txData )
 	{
 		txData.merchant = "Amazon" ;
 	}
+
+	console.log( txData ) ; 
 
 	io.emit("message", txData)	
 
