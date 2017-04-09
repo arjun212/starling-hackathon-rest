@@ -168,18 +168,18 @@ function qrConsumptionCbk( req, res)
 
 	products = products.concat( body ) ;
 
-	console.logs(products) ;
+	console.log(products) ;
 
 	for (i = 0; i < products.length; ++i)
 	{
 		products.price = Number( products.price ) ;
 	}
 
-	console.logs(products) ;
+	console.log(products) ;
 
 
 	jsonfile.writeFileSync( prodCacheFilename, products ) ;
-	console.logs(products) ;
+	console.log(products) ;
 
 
 	//HERE GET THE TX FOR AND SET IT TO TRUE
