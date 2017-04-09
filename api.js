@@ -95,7 +95,7 @@ function getSumPriceOfProds( req, res)
 
 	var result =_.map( _.groupBy( justProds, 'product' ),(v, k) => ({ 
 		      product: k,
-	      	price: _.sumBy( v, 'price' )
+	      	price: _.sumBy( Number(v), 'price' )
 	 		 }) );
 
 	var total = 0 ; 
