@@ -137,7 +137,7 @@ function webhookConsumptionCbk( req, res )
 
 function qrConsumptionCbk( req, res)
 {
-	var body = JSON.parse(req.body) ;
+	var body = JSON.parse( req.body ) ;
 	console.log( body ) ;
 
 
@@ -154,7 +154,24 @@ function qrConsumptionCbk( req, res)
 
 	jsonfile.writeFileSync( prodCacheFilename, products ) ;
 
-	//HERE GET THE TX FOR 
+	//HERE GET THE TX FOR AND SET IT TO TRUE
+
+
+	var txs = jsonfile.readFileSync( txCacheFilename ) ;
+
+
+
+	// txs = _.remove(txs, { 'id' : body[0].id} ) ;
+
+
+
+
+	//RMEOVE TX FROM TXCACHE
+	// ADD IT BACK TO TXCACHE AS TRUE
+
+
+
+
 
 	res.send( "receieved QR code" ) ;
 }
