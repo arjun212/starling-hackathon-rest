@@ -262,11 +262,6 @@ function writeToTxProdsCache( arrOfTxProds )
 
 	txProds     = _.uniqBy( txProds, ( elem ) => { return elem['id'] + ' ' + elem['product'] } ) ;
 
-	txProds     = txProds.map(( elem ) => { 
-			elem.price = elem.price.toFixed( 2 );
-			return elem ;
-	} ) ;
-
 	jsonfile.writeFileSync( prodCacheFilename, txProds ) ;
 
 }
@@ -293,7 +288,7 @@ function generateProductDataForTx( txId, totalAmount )
 	{
 		results.push( { 
 			'id'      : txId,
-			'price'   : Number( resultPrices[ i ].toFixed( 2 ) ),
+			'price'   : Number(resultPrices[ i ]).toFixed( 2 ),
 			'product' : resultProducts[ i ] 
 		} ) ;
 	}
