@@ -180,6 +180,7 @@ function qrConsumptionCbk( req, res)
 
 	jsonfile.writeFileSync( prodCacheFilename, products ) ;
 	console.log(products) ;
+	console.log(products) ;
 
 
 	//HERE GET THE TX FOR AND SET IT TO TRUE
