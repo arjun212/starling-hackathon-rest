@@ -162,21 +162,31 @@ function qrConsumptionCbk( req, res)
 
 	var products = jsonfile.readFileSync( prodCacheFilename ) ;
 
+	console.log(products) ;
+
 	products = _.remove( products, { 'id' : body[0].id } ) ;
 
 	products = products.concat( body ) ;
+
+	console.logs(products) ;
 
 	for (i = 0; i < products.length; ++i)
 	{
 		products.price = Number( products.price ) ;
 	}
 
+	console.logs(products) ;
+
+
 	jsonfile.writeFileSync( prodCacheFilename, products ) ;
+	console.logs(products) ;
+
 
 	//HERE GET THE TX FOR AND SET IT TO TRUE
 
 
 	var txs = jsonfile.readFileSync( txCacheFilename ) ;
+
 
 
 	txs = _.remove(txs, { 'id' : 1 } ) ;
