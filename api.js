@@ -93,9 +93,9 @@ function getSumPriceOfProds( req, res)
 		'price' : elem.price
 	} ; } ) ;
 
-	var result =_.map( _.groupBy( justProds, 'product' ),(v, k) => ({ 
+	var result =_.map( _.groupBy( justProds, 'product' ), (v, k) => ({ 
 		      product: k,
-	      	price: _.sumBy( Number(v), 'price' )
+	      	  price: _.sumBy( JSON.parse(v), 'price' )
 	 		 }) );
 
 	var total = 0 ; 
