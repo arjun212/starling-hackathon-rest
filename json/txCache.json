@@ -3,7 +3,7 @@
         "id": "1",
         "date": "2017-04-09T11:13:13.450Z",
         "value": 10,
-        "receipts": true,
+        "receipts": false,
         "merchant": "Aldi"
     }
 ]

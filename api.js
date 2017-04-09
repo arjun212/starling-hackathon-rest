@@ -149,6 +149,8 @@ function qrConsumptionCbk( req, res)
 
 	jsonfile.writeFileSync( prodCacheFilename, products ) ;
 
+	//HERE GET THE TX FOR 
+
 	res.send( "receieved QR code" ) ;
 }
 
