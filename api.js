@@ -93,10 +93,29 @@ function getSumPriceOfProds( req, res)
 		'price' : elem.price
 	} ; } ) ;
 
-	var result =_.map( _.groupBy( justProds, 'product' ), (v, k) => ({ 
-		      product: k,
-	      	  price: _.sumBy( v, 'price' )
-	 		 }) );
+	console.log()
+
+	var grouped = _.groupBy( justProds, 'product' ) ;
+
+	var result = [] ;
+
+	for ( var key in grouped )
+	{
+		var singleResult = {};
+
+		singleResult.product = key ;
+		var vals = grouped[key] ;
+
+		var tot = 0;
+
+		for (i = 0; i < vals.length; ++i )
+		{
+			tot += Number(vals[i].price) ;
+		}
+
+		singleResult.price = Number(tot.toFixed(2));
+		result.push(singleResult)
+	}
 
 	var total = 0 ; 
 
@@ -108,7 +127,7 @@ function getSumPriceOfProds( req, res)
 
 	for ( i = 0; i < result.length; ++i )
 	{
-		result[ i ].percent = (result[ i ].price / total) * 100 ; 
+		result[ i ].percent = Number(((result[ i ].price / total) * 100).toFixed(2)) ; 
 	}
 
 
@@ -416,7 +435,7 @@ function updateTxCache( txs )
 }
 
 
-//=============================================================================
+//===========================================================================
 // Monzo OAuth Logic, If we need it, we'll use it
 //=============================================================================
 
