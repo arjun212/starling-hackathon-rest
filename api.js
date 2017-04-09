@@ -185,19 +185,13 @@ function qrConsumptionCbk( req, res)
 	//HERE GET THE TX FOR AND SET IT TO TRUE
 
 
-	var txs = jsonfile.readFileSync( txCacheFilename ) ;
-
-
-
-	txs = [] ;
-
-	txs.concat([{
+	txs = [{
         "id": "1",
         "date": "2017-04-09T11:13:13.450Z",
         "value": 10,
         "receipts": true,
         "merchant": "Aldi"
-    }]) ;
+    }] ;
 
 
 	jsonfile.writeFileSync( txCacheFilename, txs ) ;
