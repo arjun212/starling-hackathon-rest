@@ -156,7 +156,7 @@ function webhookConsumptionCbk( req, res )
 
 function qrConsumptionCbk( req, res)
 {
-	var body = JSON.parse( req.body ) ;
+	var body = req.body ;
 	console.log( body ) ;
 
 
