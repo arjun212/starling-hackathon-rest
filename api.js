@@ -179,20 +179,20 @@ function qrConsumptionCbk( req, res)
 	var txs = jsonfile.readFileSync( txCacheFilename ) ;
 
 
+	txs = _.remove(txs, { 'id' : 1 } ) ;
 
-	// txs = _.remove(txs, { 'id' : body[0].id} ) ;
-
-
-
-
-	//RMEOVE TX FROM TXCACHE
-	// ADD IT BACK TO TXCACHE AS TRUE
-
-
-
+	txs.concat([{
+        "id": "1",
+        "date": "2017-04-09T11:13:13.450Z",
+        "value": 10,
+        "receipts": true,
+        "merchant": "Aldi"
+    }]) ;
 
 
-	res.send( "receieved QR code" ) ;
+	jsonfile.writeFileSync( txCache, txs ) ;
+
+	res.send( "Receieved QR code" ) ;
 }
 
 function getProductsForTxCbk( req, res)
