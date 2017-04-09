@@ -76,10 +76,47 @@ app.get ( '/api/getAllProducts'         , getProductsCbk        ) ;
 app.get ( '/api/getProductsForTx/:txId' , getProductsForTxCbk   ) ;
 
 
+app.get ( '/api/getSumPriceOfProds'        , getSumPriceOfProds   ) ;
+
+
 
 //=============================================================================
 // API Definitions
 //=============================================================================
+
+function getSumPriceOfProds( req, res)
+{
+	var allProductsInTx = jsonfile.readFileSync( prodCacheFilename ) ;
+
+	var justProds = allProductsInTx.map( ( elem ) => { return { 
+		'product' : elem.product ,
+		'price' : elem.price
+	} ; } ) ;
+
+	var result =_.map( _.groupBy( justProds, 'product' ),(v, k) => ({ 
+		      product: k,
+	      	price: _.sumBy( v, 'price' )
+	 		 }) );
+
+	var total = 0 ; 
+
+
+	for ( i = 0; i < result.length; ++i )
+	{
+		total += result[ i ].price ;
+	}
+
+	for ( i = 0; i < result.length; ++i )
+	{
+		result[ i ].percent = (result[ i ].price / total) * 100 ; 
+	}
+
+
+	console.log( result ) ;
+
+	res.json( result ) ;
+
+}
 
 function webhookConsumptionCbk( req, res )
 {
@@ -100,7 +137,7 @@ function webhookConsumptionCbk( req, res )
 
 function qrConsumptionCbk( req, res)
 {
-	var body = req.body ;
+	var body = JSON.parse(req.body) ;
 	console.log( body ) ;
 
 
